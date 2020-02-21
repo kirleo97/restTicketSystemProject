@@ -3,7 +3,6 @@ package com.example.RestTicketSystem.controller;
 import com.example.RestTicketSystem.assembler.EventTypeModelAssembler;
 import com.example.RestTicketSystem.domain.EventType;
 import com.example.RestTicketSystem.error.EventTypeNotFoundException;
-import com.example.RestTicketSystem.error.EventTypeUnsupportedFieldPatchException;
 import com.example.RestTicketSystem.model.EventTypeModel;
 import com.example.RestTicketSystem.service.EventTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +12,7 @@ import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping(path = "/eventType", produces = "application/json")
@@ -72,15 +69,13 @@ public class EventTypeController {
     @PatchMapping(value = "/{id}", consumes = "application/json")
     public EventType patchEventType(@PathVariable Integer id, @RequestBody EventType patchEventType) {
         EventType eventType = eventTypeService.findById(id).orElseThrow(() -> new EventTypeNotFoundException(id));
-        Set<String> fields = new HashSet<>();
+        //Set<String> fields = new HashSet<>();
         if (patchEventType.getEventTypeName() != null) {
             eventType.setEventTypeName(patchEventType.getEventTypeName());
-        } else {
-            fields.add("eventTypeName");
         }
-        if (fields.size() != 0) {
+        /*if (fields.size() != 0) {
             throw new EventTypeUnsupportedFieldPatchException(fields);
-        }
+        }*/
         return eventTypeService.saveEventType(eventType);
     }
 

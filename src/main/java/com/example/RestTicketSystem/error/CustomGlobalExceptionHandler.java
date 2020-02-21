@@ -11,12 +11,12 @@ import java.io.IOException;
 @ControllerAdvice
 public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler({EventTypeNotFoundException.class, ManagerNotFoundException.class})
+    @ExceptionHandler({EventTypeNotFoundException.class, ManagerNotFoundException.class, StadiumNotFoundException.class, EventNotFoundException.class})
     public void eventTypeHandleNotFound(HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.NOT_FOUND.value());
     }
 
-    @ExceptionHandler({EventTypeUnsupportedFieldPatchException.class, ManagerUnsupportedFieldPatchException.class})
+    @ExceptionHandler({EventTypeUnsupportedFieldPatchException.class, ManagerUnsupportedFieldPatchException.class, StadiumUnsupportedFieldPatchException.class})
     public void EventTypeUnsupportedFieldPatch(HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.METHOD_NOT_ALLOWED.value());
     }

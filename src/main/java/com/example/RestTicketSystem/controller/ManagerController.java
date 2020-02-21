@@ -3,7 +3,6 @@ package com.example.RestTicketSystem.controller;
 import com.example.RestTicketSystem.assembler.ManagerModelAssembler;
 import com.example.RestTicketSystem.domain.Manager;
 import com.example.RestTicketSystem.error.ManagerNotFoundException;
-import com.example.RestTicketSystem.error.ManagerUnsupportedFieldPatchException;
 import com.example.RestTicketSystem.model.ManagerModel;
 import com.example.RestTicketSystem.service.ManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +12,7 @@ import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping(path = "/manager", produces = "application/json")
@@ -61,20 +58,16 @@ public class ManagerController {
     @PatchMapping(value = "/{id}", consumes = "application/json")
     public Manager patchManager(@PathVariable Integer id, @RequestBody Manager patchManager) {
         Manager manager = managerService.findById(id).orElseThrow(() -> new ManagerNotFoundException(id));
-        Set<String> fields = new HashSet<>();
+        //Set<String> fields = new HashSet<>();
         if (patchManager.getManagerName() != null) {
             manager.setManagerName(patchManager.getManagerName());
-        } else {
-            fields.add("eventTypeName");
         }
         if (patchManager.getManagerTelephoneNumber() != null) {
             manager.setManagerTelephoneNumber(patchManager.getManagerTelephoneNumber());
-        } else {
-            fields.add("managerTelephoneNumber");
         }
-        if (fields.size() != 0) {
+        /*if (fields.size() != 0) {
             throw new ManagerUnsupportedFieldPatchException(fields);
-        }
+        }*/
         return managerService.saveManager(manager);
     }
 
