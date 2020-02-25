@@ -21,9 +21,7 @@ public class EventService {
         this.eventRepository = eventRepository;
     }
 
-    public Optional<Event> findById(Integer id) {
-        return eventRepository.findById(id);
-    }
+    public Optional<Event> findById(Integer id) { return eventRepository.findById(id); }
 
     public List<Event> findAll() {
         return eventRepository.findAll();

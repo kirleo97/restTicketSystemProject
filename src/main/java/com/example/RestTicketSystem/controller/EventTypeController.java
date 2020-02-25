@@ -8,10 +8,12 @@ import com.example.RestTicketSystem.service.EventTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -45,15 +47,18 @@ public class EventTypeController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = "application/json")
-    public EventType createEventType(@RequestBody EventType eventType) {
+    public EventType createEventType(@Valid @RequestBody EventType eventType) {
         return eventTypeService.saveEventType(eventType);
     }
 
     @GetMapping("/{id}")
-    public EventType getEventTypeById(@PathVariable Integer id) {
+    public EntityModel<EventTypeModel> getEventTypeById(@PathVariable Integer id) {
         /*EventType eventType = eventTypeService.findById(id).get();
         return eventType == null ? new ResponseEntity<>(null, HttpStatus.NOT_FOUND) : new ResponseEntity<>(eventType, HttpStatus.OK);*/
-        return eventTypeService.findById(id).orElseThrow(() -> new EventTypeNotFoundException(id));
+        EventType eventType = eventTypeService.findById(id).orElseThrow(() -> new EventTypeNotFoundException(id));
+        EventTypeModel eventTypeModel = new EventTypeModel(eventType);
+        EntityModel<EventTypeModel> entityModel = new EntityModel<>(eventTypeModel, WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EventTypeController.class).getEventTypeById(id)).withRel("eventTypeById"));
+        return entityModel;
     }
 
     @PutMapping("/{id}")

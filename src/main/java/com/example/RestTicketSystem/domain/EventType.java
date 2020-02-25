@@ -17,8 +17,8 @@ public class EventType {
 
     @Pattern(message = "The value must start with a capital letter. Irregular shape: ${validatedValue}",
             regexp = "^[A-Z]{1}.{1,99}")
-    @Length(min = 2, max = 100)
-    @NotBlank
+    @Length(min = 2, max = 100, message = "The length must be between 2 and 100 letters")
+    @NotBlank(message = "Please provide a name for EventType")
     @Column(name = "EVENTTYPE_NAME", nullable = false, unique = true)
     private String eventTypeName;
 

@@ -2,13 +2,17 @@ package com.example.RestTicketSystem.controller;
 
 import com.example.RestTicketSystem.assembler.StadiumModelAssembler;
 import com.example.RestTicketSystem.domain.EventType;
+import com.example.RestTicketSystem.domain.Sector;
 import com.example.RestTicketSystem.domain.Stadium;
+import com.example.RestTicketSystem.error.SectorNotFoundException;
 import com.example.RestTicketSystem.error.StadiumNotFoundException;
+import com.example.RestTicketSystem.model.SectorModel;
 import com.example.RestTicketSystem.model.StadiumModel;
 import com.example.RestTicketSystem.service.StadiumService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -36,8 +40,12 @@ public class StadiumController {
     }
 
     @GetMapping("{id}")
-    public Stadium getStadiumById(@PathVariable Integer id) {
-        return stadiumService.findById(id).orElseThrow(() -> new StadiumNotFoundException(id));
+    public EntityModel<StadiumModel> getStadiumById(@PathVariable Integer id) {
+        //return stadiumService.findById(id).orElseThrow(() -> new StadiumNotFoundException(id));
+        Stadium stadium = stadiumService.findById(id).orElseThrow(() -> new StadiumNotFoundException(id));
+        StadiumModel stadiumModel = new StadiumModel(stadium);
+        EntityModel<StadiumModel> entityModel = new EntityModel<>(stadiumModel, WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(StadiumController.class).getStadiumById(id)).withRel("stadiumById"));
+        return entityModel;
     }
 
     @ResponseStatus(HttpStatus.CREATED)

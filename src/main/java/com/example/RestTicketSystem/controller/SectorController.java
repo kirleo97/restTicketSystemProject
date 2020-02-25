@@ -9,6 +9,7 @@ import com.example.RestTicketSystem.service.SectorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -36,8 +37,12 @@ public class SectorController {
     }
 
     @GetMapping("{id}")
-    public Sector getSectorById(@PathVariable Integer id) {
-        return sectorService.findById(id).orElseThrow(() -> new SectorNotFoundException(id));
+    public EntityModel<SectorModel> getSectorById(@PathVariable Integer id) {
+        //return sectorService.findById(id).orElseThrow(() -> new SectorNotFoundException(id));
+        Sector sector = sectorService.findById(id).orElseThrow(() -> new SectorNotFoundException(id));
+        SectorModel sectorModel = new SectorModel(sector);
+        EntityModel<SectorModel> entityModel = new EntityModel<>(sectorModel, WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(SectorController.class).getSectorById(id)).withRel("sectorById"));
+        return entityModel;
     }
 
     @ResponseStatus(HttpStatus.CREATED)

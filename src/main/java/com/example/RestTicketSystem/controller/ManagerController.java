@@ -8,6 +8,7 @@ import com.example.RestTicketSystem.service.ManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -35,8 +36,12 @@ public class ManagerController {
     }
 
     @GetMapping("/{id}")
-    public Manager getManagerById(@PathVariable Integer id) {
-        return managerService.findById(id).orElseThrow(() -> new ManagerNotFoundException(id));
+    public EntityModel<ManagerModel> getManagerById(@PathVariable Integer id) {
+        //return managerService.findById(id).orElseThrow(() -> new ManagerNotFoundException(id));
+        Manager manager = managerService.findById(id).orElseThrow(() -> new ManagerNotFoundException(id));
+        ManagerModel managerModel = new ManagerModel(manager);
+        EntityModel<ManagerModel> entityModel = new EntityModel<>(managerModel, WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(ManagerController.class).getManagerById(id)).withRel("eventTypeById"));
+        return entityModel;
     }
 
     @ResponseStatus(HttpStatus.CREATED)

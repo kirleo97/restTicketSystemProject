@@ -14,6 +14,7 @@ import com.example.RestTicketSystem.service.StadiumService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -28,16 +29,10 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class EventController {
     private final EventService eventService;
-    private final EventTypeService eventTypeService;
-    private final StadiumService stadiumService;
-    private final ManagerService managerService;
 
     @Autowired
-    public EventController(EventService eventService, EventTypeService eventTypeService, StadiumService stadiumService, ManagerService managerService) {
+    public EventController(EventService eventService) {
         this.eventService = eventService;
-        this.eventTypeService = eventTypeService;
-        this.stadiumService = stadiumService;
-        this.managerService = managerService;
     }
 
     @GetMapping
@@ -49,8 +44,12 @@ public class EventController {
     }
 
     @GetMapping("{id}")
-    public Event getEventById(@PathVariable Integer id) {
-        return eventService.findById(id).orElseThrow(() -> new EventNotFoundException(id));
+    public EntityModel<EventModel> getEventById(@PathVariable Integer id) {
+        //return eventService.findById(id).orElseThrow(() -> new EventNotFoundException(id));
+        Event event = eventService.findById(id).orElseThrow(() -> new EventNotFoundException(id));
+        EventModel eventModel = new EventModel(event);
+        EntityModel<EventModel> entityModel = new EntityModel<>(eventModel, WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EventController.class).getEventById(id)).withRel("eventById"));
+        return entityModel;
     }
 
     @ResponseStatus(HttpStatus.CREATED)
