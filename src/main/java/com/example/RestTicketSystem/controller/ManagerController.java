@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(path = "/manager", produces = "application/json")
@@ -56,6 +57,18 @@ public class ManagerController {
     }
 
     @PatchMapping(value = "/{id}", consumes = "application/json")
+    public Manager patchManager(@RequestBody Map<String, Object> update, @PathVariable Integer id) {
+        Manager manager = managerService.findById(id).orElseThrow(() -> new ManagerNotFoundException(id));
+        if (update.containsKey("managerName")) {
+            manager.setManagerName((String) update.get("managerName"));
+        }
+        if (update.containsKey("managerTelephoneNumber")) {
+            manager.setManagerTelephoneNumber((String) update.get("managerTelephoneNumber"));
+        }
+        return managerService.saveManager(manager);
+    }
+
+    /*@PatchMapping(value = "/{id}", consumes = "application/json")
     public Manager patchManager(@PathVariable Integer id, @RequestBody Manager patchManager) {
         Manager manager = managerService.findById(id).orElseThrow(() -> new ManagerNotFoundException(id));
         //Set<String> fields = new HashSet<>();
@@ -65,11 +78,11 @@ public class ManagerController {
         if (patchManager.getManagerTelephoneNumber() != null) {
             manager.setManagerTelephoneNumber(patchManager.getManagerTelephoneNumber());
         }
-        /*if (fields.size() != 0) {
+        *//*if (fields.size() != 0) {
             throw new ManagerUnsupportedFieldPatchException(fields);
-        }*/
+        }*//*
         return managerService.saveManager(manager);
-    }
+    }*/
 
     @DeleteMapping("/{id}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)

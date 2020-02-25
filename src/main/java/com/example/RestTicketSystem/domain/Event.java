@@ -20,7 +20,7 @@ public class Event {
     private Integer id;
 
     @NotNull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "EVENT_EVENTTYPE", nullable = false)
     private EventType eventType;
 
@@ -36,7 +36,7 @@ public class Event {
     private LocalDateTime dateOfEvent;
 
     @NotNull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "STADIUM_ID", nullable = false)
     private Stadium stadiumOfEvent;
 
@@ -53,7 +53,7 @@ public class Event {
     private LocalDate endOfDismantleOfStadium;
 
     @NotNull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "MANAGER_ID", nullable = false)
     private Manager eventManager;
 

@@ -57,7 +57,5 @@ public class Manager {
         return managerTelephoneNumber;
     }
 
-    public void setManagerTelephoneNumber(String managerTelephoneNumber) {
-        this.managerTelephoneNumber = managerTelephoneNumber;
-    }
+    public void setManagerTelephoneNumber(String managerTelephoneNumber) { this.managerTelephoneNumber = managerTelephoneNumber; }
 }

@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(path = "/eventType", produces = "application/json")
@@ -29,11 +30,10 @@ public class EventTypeController {
     public CollectionModel<EventTypeModel> getAllEventTypes() {
         /*List<EventType> eventTypes = eventTypeService.findAll();
         CollectionModel<EventTypeModel> eventTypeModels = new EventTypeModelAssembler(EventTypeController.class, EventTypeModel.class).toCollectionModel(eventTypes);
-        CollectionModel<Even>
         CollectionModel<EntityModel<EventType>> collectionModel = CollectionModel.wrap(eventTypes);
 
-        //recentResources.add(new Link("http://localhost:8080/eventType/recent", "recents"));
-        //collectionModel.add(WebMvcLinkBuilder.linkTo(EventTypeController.class).slash("recent").withRel("recents"));
+        recentResources.add(new Link("http://localhost:8080/eventType/recent", "recents"));
+        collectionModel.add(WebMvcLinkBuilder.linkTo(EventTypeController.class).slash("recent").withRel("recents"));
         collectionModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EventTypeController.class).getAllEventTypes()).withRel("recents"))*/;
 
 
@@ -66,16 +66,25 @@ public class EventTypeController {
         return eventTypeService.saveEventType(newEventType);
     }
 
-    @PatchMapping(value = "/{id}", consumes = "application/json")
+    /*@PatchMapping(value = "/{id}", consumes = "application/json")
     public EventType patchEventType(@PathVariable Integer id, @RequestBody EventType patchEventType) {
         EventType eventType = eventTypeService.findById(id).orElseThrow(() -> new EventTypeNotFoundException(id));
         //Set<String> fields = new HashSet<>();
         if (patchEventType.getEventTypeName() != null) {
             eventType.setEventTypeName(patchEventType.getEventTypeName());
         }
-        /*if (fields.size() != 0) {
+        *//*if (fields.size() != 0) {
             throw new EventTypeUnsupportedFieldPatchException(fields);
-        }*/
+        }*//*
+        return eventTypeService.saveEventType(eventType);
+    }*/
+
+    @PatchMapping(value = "/{id}", consumes = "application/json")
+    public EventType patchEventType(@RequestBody Map<String, Object> update, @PathVariable Integer id) {
+        EventType eventType = eventTypeService.findById(id).orElseThrow(() -> new EventTypeNotFoundException(id));
+        if (update.containsKey("eventTypeName")) {
+            eventType.setEventTypeName((String) update.get("eventTypeName"));
+        }
         return eventTypeService.saveEventType(eventType);
     }
 

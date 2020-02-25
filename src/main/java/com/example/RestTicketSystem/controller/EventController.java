@@ -2,6 +2,9 @@ package com.example.RestTicketSystem.controller;
 
 import com.example.RestTicketSystem.assembler.EventModelAssembler;
 import com.example.RestTicketSystem.domain.Event;
+import com.example.RestTicketSystem.domain.EventType;
+import com.example.RestTicketSystem.domain.Manager;
+import com.example.RestTicketSystem.domain.Stadium;
 import com.example.RestTicketSystem.error.EventNotFoundException;
 import com.example.RestTicketSystem.model.EventModel;
 import com.example.RestTicketSystem.service.EventService;
@@ -15,7 +18,10 @@ import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(path = "/event", produces = "application/json")
@@ -33,6 +39,7 @@ public class EventController {
         this.stadiumService = stadiumService;
         this.managerService = managerService;
     }
+
     @GetMapping
     public CollectionModel<EventModel> getAllEvents() {
         List<Event> events = eventService.findAll();
@@ -69,28 +76,28 @@ public class EventController {
     }
 
     @PatchMapping(value = "/{id}", consumes = "application/json")
-    public Event patchEvent(@PathVariable Integer id, @RequestBody Event patchEvent) {
+    public Event patchEvent(@RequestBody Map<String, Object> update, @PathVariable Integer id) {
         Event event = eventService.findById(id).orElseThrow(() -> new EventNotFoundException(id));
-        if (patchEvent.getEventType() != null) {
-            event.setEventType(patchEvent.getEventType());
+        if (update.containsKey("eventType")) {
+            event.setEventType((EventType) update.get("eventType"));
         }
-        if (patchEvent.getEventName() != null) {
-            event.setEventName(patchEvent.getEventName());
+        if (update.containsKey("eventName")) {
+            event.setEventName((String) update.get("eventName"));
         }
-        if (patchEvent.getDateOfEvent() != null) {
-            event.setDateOfEvent(patchEvent.getDateOfEvent());
+        if (update.containsKey("dateOfEvent")) {
+            event.setDateOfEvent((LocalDateTime) update.get("dateOfEvent"));
         }
-        if (patchEvent.getStadiumOfEvent() != null) {
-            event.setStadiumOfEvent(patchEvent.getStadiumOfEvent());
+        if (update.containsKey("stadiumOfEvent")) {
+            event.setStadiumOfEvent((Stadium) update.get("stadiumOfEvent"));
         }
-        if (patchEvent.getStartOfPreparationOfStadium() != null) {
-            event.setStartOfPreparationOfStadium(patchEvent.getStartOfPreparationOfStadium());
+        if (update.containsKey("startOfPreparationOfStadium")) {
+            event.setStartOfPreparationOfStadium((LocalDate) update.get("startOfPreparationOfStadium"));
         }
-        if (patchEvent.getEndOfDismantleOfStadium() != null) {
-            event.setEndOfDismantleOfStadium(patchEvent.getEndOfDismantleOfStadium());
+        if (update.containsKey("endOfDismantleOfStadium")) {
+            event.setEndOfDismantleOfStadium((LocalDate) update.get("endOfDismantleOfStadium"));
         }
-        if (patchEvent.getEventManager() != null) {
-            event.setEventManager(patchEvent.getEventManager());
+        if (update.containsKey("eventManager")) {
+            event.setEventManager((Manager) update.get("eventManager"));
         }
         return eventService.saveEvent(event);
     }
