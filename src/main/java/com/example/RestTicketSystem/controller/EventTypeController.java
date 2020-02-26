@@ -2,24 +2,30 @@ package com.example.RestTicketSystem.controller;
 
 import com.example.RestTicketSystem.assembler.EventTypeModelAssembler;
 import com.example.RestTicketSystem.domain.EventType;
-import com.example.RestTicketSystem.error.EventTypeNotFoundException;
+import com.example.RestTicketSystem.error.exception.EventTypeNotFoundException;
 import com.example.RestTicketSystem.model.EventTypeModel;
 import com.example.RestTicketSystem.service.EventTypeService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(path = "/eventType", produces = "application/json")
+@RequestMapping(path = "/eventType", produces = MediaType.APPLICATION_JSON_VALUE)
 @CrossOrigin(origins = "*")
+@Validated
 public class EventTypeController {
     private final EventTypeService eventTypeService;
 
@@ -29,7 +35,7 @@ public class EventTypeController {
     }
 
     @GetMapping
-    public CollectionModel<EventTypeModel> getAllEventTypes() {
+    public ResponseEntity<CollectionModel<EventTypeModel>> getAllEventTypes() {
         /*List<EventType> eventTypes = eventTypeService.findAll();
         CollectionModel<EventTypeModel> eventTypeModels = new EventTypeModelAssembler(EventTypeController.class, EventTypeModel.class).toCollectionModel(eventTypes);
         CollectionModel<EntityModel<EventType>> collectionModel = CollectionModel.wrap(eventTypes);
@@ -42,17 +48,17 @@ public class EventTypeController {
         List<EventType> eventTypes = eventTypeService.findAll();
         CollectionModel<EventTypeModel> collectionModel = new EventTypeModelAssembler(EventTypeController.class, EventTypeModel.class).toCollectionModel(eventTypes);
         collectionModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EventTypeController.class).getAllEventTypes()).withRel("allEventTypes"));
-        return collectionModel;
+        return ResponseEntity.ok().body(collectionModel);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping(consumes = "application/json")
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public EventType createEventType(@Valid @RequestBody EventType eventType) {
         return eventTypeService.saveEventType(eventType);
     }
 
     @GetMapping("/{id}")
-    public EntityModel<EventTypeModel> getEventTypeById(@PathVariable Integer id) {
+    public EntityModel<EventTypeModel> getEventTypeById(@PathVariable @Min(1) Integer id) {
         /*EventType eventType = eventTypeService.findById(id).get();
         return eventType == null ? new ResponseEntity<>(null, HttpStatus.NOT_FOUND) : new ResponseEntity<>(eventType, HttpStatus.OK);*/
         EventType eventType = eventTypeService.findById(id).orElseThrow(() -> new EventTypeNotFoundException(id));
@@ -62,10 +68,12 @@ public class EventTypeController {
     }
 
     @PutMapping("/{id}")
-    public EventType putEventType(@RequestBody EventType newEventType, @PathVariable Integer id) {
+    public EventType putEventType(@Valid @RequestBody EventType newEventType, @PathVariable @Min(1) Integer id) {
         EventType eventType = eventTypeService.findById(id).orElse(null);
         if (eventType != null) {
-            eventType.setEventTypeName(newEventType.getEventTypeName());
+            //eventType.setEventTypeName(newEventType.getEventTypeName());
+            BeanUtils.copyProperties(newEventType, eventType);
+            eventType.setId(newEventType.getId());
             return eventTypeService.saveEventType(eventType);
         }
         return eventTypeService.saveEventType(newEventType);
@@ -84,7 +92,7 @@ public class EventTypeController {
         return eventTypeService.saveEventType(eventType);
     }*/
 
-    @PatchMapping(value = "/{id}", consumes = "application/json")
+    @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public EventType patchEventType(@RequestBody Map<String, Object> update, @PathVariable Integer id) {
         EventType eventType = eventTypeService.findById(id).orElseThrow(() -> new EventTypeNotFoundException(id));
         if (update.containsKey("eventTypeName")) {

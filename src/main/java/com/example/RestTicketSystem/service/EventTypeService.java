@@ -27,6 +27,10 @@ public class EventTypeService {
         return eventTypeRepository.findAll();
     }
 
+    public EventType findByName(String eventTypeName) {
+        return eventTypeRepository.findByEventTypeName(eventTypeName);
+    }
+
     //public List<EventType> findRecentEventTypes(PageRequest pageRequest) { return eventTypeRepository.findAll(pageRequest).getContent(); }
 
     public EventType saveEventType(EventType eventType) {

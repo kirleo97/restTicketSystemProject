@@ -2,11 +2,8 @@ package com.example.RestTicketSystem.controller;
 
 import com.example.RestTicketSystem.assembler.StadiumModelAssembler;
 import com.example.RestTicketSystem.domain.EventType;
-import com.example.RestTicketSystem.domain.Sector;
 import com.example.RestTicketSystem.domain.Stadium;
-import com.example.RestTicketSystem.error.SectorNotFoundException;
-import com.example.RestTicketSystem.error.StadiumNotFoundException;
-import com.example.RestTicketSystem.model.SectorModel;
+import com.example.RestTicketSystem.error.exception.StadiumNotFoundException;
 import com.example.RestTicketSystem.model.StadiumModel;
 import com.example.RestTicketSystem.service.StadiumService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +12,14 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(path = "/stadium", produces = "application/json")
+@RequestMapping(path = "/stadium", produces = MediaType.APPLICATION_JSON_VALUE)
 @CrossOrigin(origins = "*")
 public class StadiumController {
     private final StadiumService stadiumService;

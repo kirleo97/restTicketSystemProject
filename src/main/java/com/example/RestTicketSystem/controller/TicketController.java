@@ -1,26 +1,23 @@
 package com.example.RestTicketSystem.controller;
 
 import com.example.RestTicketSystem.assembler.TicketModelAssembler;
-import com.example.RestTicketSystem.domain.Stadium;
 import com.example.RestTicketSystem.domain.Ticket;
-import com.example.RestTicketSystem.error.StadiumNotFoundException;
-import com.example.RestTicketSystem.error.TicketNotFoundException;
-import com.example.RestTicketSystem.model.StadiumModel;
+import com.example.RestTicketSystem.error.exception.TicketNotFoundException;
 import com.example.RestTicketSystem.model.TicketModel;
 import com.example.RestTicketSystem.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/ticket", produces = "application/json")
+@RequestMapping(path = "/ticket", produces = MediaType.APPLICATION_JSON_VALUE)
 @CrossOrigin(origins = "*")
 public class TicketController {
     private final TicketService ticketService;

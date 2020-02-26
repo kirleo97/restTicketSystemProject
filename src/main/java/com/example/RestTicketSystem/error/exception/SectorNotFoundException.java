@@ -1,4 +1,4 @@
-package com.example.RestTicketSystem.error;
+package com.example.RestTicketSystem.error.exception;
 
 public class SectorNotFoundException extends RuntimeException {
     public SectorNotFoundException(Integer id) {

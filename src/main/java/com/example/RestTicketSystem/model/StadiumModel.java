@@ -11,6 +11,7 @@ import java.util.List;
 public class StadiumModel extends RepresentationModel<StadiumModel> {
     private final String stadiumName;
     private final List<EventType> eventTypes;
+    //private static EventTypeModelAssembler eventTypeModelAssembler = new EventTypeModelAssembler(EventController.class, EventTypeModel.class);
 
     public String getStadiumName() {
         return stadiumName;
@@ -22,6 +23,7 @@ public class StadiumModel extends RepresentationModel<StadiumModel> {
 
     public StadiumModel(Stadium stadium) {
         this.stadiumName = stadium.getStadiumName();
+        //this.eventTypes = eventTypeModelAssembler.toCollectionModel(getEventTypes());
         this.eventTypes = stadium.getEventTypes();
     }
 }

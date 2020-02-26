@@ -3,7 +3,7 @@ package com.example.RestTicketSystem.controller;
 import com.example.RestTicketSystem.assembler.SectorModelAssembler;
 import com.example.RestTicketSystem.domain.Sector;
 import com.example.RestTicketSystem.domain.Stadium;
-import com.example.RestTicketSystem.error.SectorNotFoundException;
+import com.example.RestTicketSystem.error.exception.SectorNotFoundException;
 import com.example.RestTicketSystem.model.SectorModel;
 import com.example.RestTicketSystem.service.SectorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +12,14 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(path = "/sector", produces = "application/json")
+@RequestMapping(path = "/sector", produces = MediaType.APPLICATION_JSON_VALUE)
 @CrossOrigin(origins = "*")
 public class SectorController {
     private final SectorService sectorService;

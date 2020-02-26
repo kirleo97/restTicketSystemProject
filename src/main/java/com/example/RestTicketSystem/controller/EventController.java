@@ -5,18 +5,16 @@ import com.example.RestTicketSystem.domain.Event;
 import com.example.RestTicketSystem.domain.EventType;
 import com.example.RestTicketSystem.domain.Manager;
 import com.example.RestTicketSystem.domain.Stadium;
-import com.example.RestTicketSystem.error.EventNotFoundException;
+import com.example.RestTicketSystem.error.exception.EventNotFoundException;
 import com.example.RestTicketSystem.model.EventModel;
 import com.example.RestTicketSystem.service.EventService;
-import com.example.RestTicketSystem.service.EventTypeService;
-import com.example.RestTicketSystem.service.ManagerService;
-import com.example.RestTicketSystem.service.StadiumService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -25,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(path = "/event", produces = "application/json")
+@RequestMapping(path = "/event", produces = MediaType.APPLICATION_JSON_VALUE)
 @CrossOrigin(origins = "*")
 public class EventController {
     private final EventService eventService;
