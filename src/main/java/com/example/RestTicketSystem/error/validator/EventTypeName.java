@@ -1,3 +1,4 @@
+/*
 package com.example.RestTicketSystem.error.validator;
 
 import javax.validation.Constraint;
@@ -21,3 +22,4 @@ public @interface EventTypeName {
 
     Class<? extends Payload>[] payload() default {};
 }
+*/

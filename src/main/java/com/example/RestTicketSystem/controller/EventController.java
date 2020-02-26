@@ -5,7 +5,7 @@ import com.example.RestTicketSystem.domain.Event;
 import com.example.RestTicketSystem.domain.EventType;
 import com.example.RestTicketSystem.domain.Manager;
 import com.example.RestTicketSystem.domain.Stadium;
-import com.example.RestTicketSystem.error.exception.EventNotFoundException;
+import com.example.RestTicketSystem.error.exception.notFound.EventNotFoundException;
 import com.example.RestTicketSystem.model.EventModel;
 import com.example.RestTicketSystem.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;

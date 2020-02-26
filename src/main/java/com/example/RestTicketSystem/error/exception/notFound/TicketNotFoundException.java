@@ -1,4 +1,4 @@
-package com.example.RestTicketSystem.error.exception;
+package com.example.RestTicketSystem.error.exception.notFound;
 
 public class TicketNotFoundException extends RuntimeException {
     public TicketNotFoundException(Integer id) {

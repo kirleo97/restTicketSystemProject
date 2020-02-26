@@ -2,7 +2,7 @@ package com.example.RestTicketSystem.controller;
 
 import com.example.RestTicketSystem.assembler.ManagerModelAssembler;
 import com.example.RestTicketSystem.domain.Manager;
-import com.example.RestTicketSystem.error.exception.ManagerNotFoundException;
+import com.example.RestTicketSystem.error.exception.notFound.ManagerNotFoundException;
 import com.example.RestTicketSystem.model.ManagerModel;
 import com.example.RestTicketSystem.service.ManagerService;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -3,7 +3,7 @@ package com.example.RestTicketSystem.controller;
 import com.example.RestTicketSystem.assembler.SectorModelAssembler;
 import com.example.RestTicketSystem.domain.Sector;
 import com.example.RestTicketSystem.domain.Stadium;
-import com.example.RestTicketSystem.error.exception.SectorNotFoundException;
+import com.example.RestTicketSystem.error.exception.notFound.SectorNotFoundException;
 import com.example.RestTicketSystem.model.SectorModel;
 import com.example.RestTicketSystem.service.SectorService;
 import org.springframework.beans.factory.annotation.Autowired;

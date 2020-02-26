@@ -1,4 +1,4 @@
-package com.example.RestTicketSystem.error.exception;
+package com.example.RestTicketSystem.error.exception.notFound;
 
 public class StadiumNotFoundException extends RuntimeException {
     public StadiumNotFoundException(Integer id) {

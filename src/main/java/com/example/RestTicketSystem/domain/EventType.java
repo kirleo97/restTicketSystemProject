@@ -1,6 +1,5 @@
 package com.example.RestTicketSystem.domain;
 
-import com.example.RestTicketSystem.error.validator.EventTypeName;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,7 +19,6 @@ public class EventType {
             regexp = "^[A-Z]{1}.{1,99}")
     @Length(min = 2, max = 100, message = "The length must be between 2 and 100 letters")
     @NotBlank(message = "Please provide a name for EventType")
-    @EventTypeName
     @Column(name = "EVENTTYPE_NAME", nullable = false, unique = true)
     private String eventTypeName;
 

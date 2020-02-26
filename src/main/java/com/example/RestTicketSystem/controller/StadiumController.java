@@ -3,7 +3,7 @@ package com.example.RestTicketSystem.controller;
 import com.example.RestTicketSystem.assembler.StadiumModelAssembler;
 import com.example.RestTicketSystem.domain.EventType;
 import com.example.RestTicketSystem.domain.Stadium;
-import com.example.RestTicketSystem.error.exception.StadiumNotFoundException;
+import com.example.RestTicketSystem.error.exception.notFound.StadiumNotFoundException;
 import com.example.RestTicketSystem.model.StadiumModel;
 import com.example.RestTicketSystem.service.StadiumService;
 import org.springframework.beans.factory.annotation.Autowired;

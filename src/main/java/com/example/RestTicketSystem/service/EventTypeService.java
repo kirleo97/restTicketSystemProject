@@ -1,14 +1,13 @@
 package com.example.RestTicketSystem.service;
 
 import com.example.RestTicketSystem.domain.EventType;
+import com.example.RestTicketSystem.error.exception.ResourceAlreadyExistsException;
 import com.example.RestTicketSystem.repository.EventTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class EventTypeService {
@@ -19,8 +18,16 @@ public class EventTypeService {
         this.eventTypeRepository = eventTypeRepository;
     }
 
-    public Optional<EventType> findById(Integer id) {
-        return eventTypeRepository.findById(id);
+    public boolean existsById(Integer id) {
+        return eventTypeRepository.existsById(id);
+    }
+
+    public EventType findById(Integer id) throws ResourceNotFoundException {
+        EventType eventType = eventTypeRepository.findById(id).orElse(null);
+        if (eventType == null) {
+            throw new ResourceNotFoundException("EventType with ID " + id + " doesn't exist!");
+        } else
+            return eventType;
     }
 
     public List<EventType> findAll() {
@@ -31,17 +38,30 @@ public class EventTypeService {
         return eventTypeRepository.findByEventTypeName(eventTypeName);
     }
 
-    //public List<EventType> findRecentEventTypes(PageRequest pageRequest) { return eventTypeRepository.findAll(pageRequest).getContent(); }
-
-    public EventType saveEventType(EventType eventType) {
+    public EventType saveEventType(EventType eventType) throws ResourceAlreadyExistsException {
+        String eventTypeName = eventType.getEventTypeName();
+        EventType checkEventType = findByName(eventTypeName);
+        if ( (checkEventType != null) && (!checkEventType.getId().equals(eventType.getId())) ) {
+            throw new ResourceAlreadyExistsException("EventType with name [" + eventTypeName + "] is already exist!");
+        }
         return eventTypeRepository.save(eventType);
     }
 
+    /*public EventType updateEventType(EventType eventType) throws ResourceNotFoundException {
+        if (!existsById(eventType.getId())) {
+            throw new ResourceNotFoundException("EventType with ID " + eventType.getId() + " doesn't exist!");
+        }
+        return eventTypeRepository.save(eventType);
+    }*/
+
     public void deleteById(Integer id) {
+        if (!existsById(id)) {
+            throw new ResourceNotFoundException("EventType with ID " + id + " doesn't exist!");
+        }
         eventTypeRepository.deleteById(id);
     }
 
-    public boolean isValidationForEventTypeSuccessful(EventType eventType, BindingResult bindingResult) {
+    /*public boolean isValidationForEventTypeSuccessful(EventType eventType, BindingResult bindingResult) {
         EventType checkEventType = eventTypeRepository.findByEventTypeName(eventType.getEventTypeName());
         if (checkEventType != null) {
             if (!checkEventType.getId().equals(eventType.getId())) {
@@ -49,5 +69,5 @@ public class EventTypeService {
             }
         }
         return !bindingResult.hasErrors();
-    }
+    }*/
 }

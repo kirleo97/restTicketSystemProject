@@ -2,7 +2,7 @@ package com.example.RestTicketSystem.controller;
 
 import com.example.RestTicketSystem.assembler.TicketModelAssembler;
 import com.example.RestTicketSystem.domain.Ticket;
-import com.example.RestTicketSystem.error.exception.TicketNotFoundException;
+import com.example.RestTicketSystem.error.exception.notFound.TicketNotFoundException;
 import com.example.RestTicketSystem.model.TicketModel;
 import com.example.RestTicketSystem.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
