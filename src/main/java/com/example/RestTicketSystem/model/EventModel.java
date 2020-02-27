@@ -1,9 +1,11 @@
 package com.example.RestTicketSystem.model;
 
+import com.example.RestTicketSystem.assembler.ManagerModelAssembler;
+import com.example.RestTicketSystem.assembler.StadiumModelAssembler;
+import com.example.RestTicketSystem.controller.ManagerController;
+import com.example.RestTicketSystem.controller.StadiumController;
 import com.example.RestTicketSystem.domain.Event;
 import com.example.RestTicketSystem.domain.EventType;
-import com.example.RestTicketSystem.domain.Manager;
-import com.example.RestTicketSystem.domain.Stadium;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 
@@ -15,10 +17,12 @@ public class EventModel extends RepresentationModel<EventModel> {
     private final EventType eventType;
     private final String eventName;
     private final LocalDateTime dateOfEvent;
-    private final Stadium stadiumOfEvent;
+    private final StadiumModel stadiumOfEvent;
     private final LocalDate startOfPreparationOfStadium;
     private final LocalDate endOfDismantleOfStadium;
-    private final Manager eventManager;
+    private final ManagerModel eventManager;
+    private static final StadiumModelAssembler stadiumModelAssembler = new StadiumModelAssembler(StadiumController.class, StadiumModel.class);
+    private static final ManagerModelAssembler managerModelAssembler = new ManagerModelAssembler(ManagerController.class, ManagerModel.class);
 
     public EventType getEventType() {
         return eventType;
@@ -32,10 +36,6 @@ public class EventModel extends RepresentationModel<EventModel> {
         return dateOfEvent;
     }
 
-    public Stadium getStadiumOfEvent() {
-        return stadiumOfEvent;
-    }
-
     public LocalDate getStartOfPreparationOfStadium() {
         return startOfPreparationOfStadium;
     }
@@ -44,7 +44,11 @@ public class EventModel extends RepresentationModel<EventModel> {
         return endOfDismantleOfStadium;
     }
 
-    public Manager getEventManager() {
+    public StadiumModel getStadiumOfEvent() {
+        return stadiumOfEvent;
+    }
+
+    public ManagerModel getEventManager() {
         return eventManager;
     }
 
@@ -52,9 +56,9 @@ public class EventModel extends RepresentationModel<EventModel> {
         this.eventType = event.getEventType();
         this.eventName = event.getEventName();
         this.dateOfEvent = event.getDateOfEvent();
-        this.stadiumOfEvent = event.getStadiumOfEvent();
+        this.stadiumOfEvent = stadiumModelAssembler.toModel(event.getStadiumOfEvent());
         this.startOfPreparationOfStadium = event.getStartOfPreparationOfStadium();
         this.endOfDismantleOfStadium = event.getEndOfDismantleOfStadium();
-        this.eventManager = event.getEventManager();
+        this.eventManager = managerModelAssembler.toModel(event.getEventManager());
     }
 }
