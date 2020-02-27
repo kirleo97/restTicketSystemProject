@@ -1,11 +1,12 @@
 package com.example.RestTicketSystem.model;
 
+import com.example.RestTicketSystem.assembler.EventTypeModelAssembler;
 import com.example.RestTicketSystem.assembler.ManagerModelAssembler;
 import com.example.RestTicketSystem.assembler.StadiumModelAssembler;
+import com.example.RestTicketSystem.controller.EventTypeController;
 import com.example.RestTicketSystem.controller.ManagerController;
 import com.example.RestTicketSystem.controller.StadiumController;
 import com.example.RestTicketSystem.domain.Event;
-import com.example.RestTicketSystem.domain.EventType;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 
 @Relation(value = "event", collectionRelation = "events")
 public class EventModel extends RepresentationModel<EventModel> {
-    private final EventType eventType;
+    private final EventTypeModel eventType;
     private final String eventName;
     private final LocalDateTime dateOfEvent;
     private final StadiumModel stadiumOfEvent;
@@ -23,8 +24,9 @@ public class EventModel extends RepresentationModel<EventModel> {
     private final ManagerModel eventManager;
     private static final StadiumModelAssembler stadiumModelAssembler = new StadiumModelAssembler(StadiumController.class, StadiumModel.class);
     private static final ManagerModelAssembler managerModelAssembler = new ManagerModelAssembler(ManagerController.class, ManagerModel.class);
+    private static final EventTypeModelAssembler eventTypeModelAssembler = new EventTypeModelAssembler(EventTypeController.class, EventTypeModel.class);
 
-    public EventType getEventType() {
+    public EventTypeModel getEventType() {
         return eventType;
     }
 
@@ -53,7 +55,7 @@ public class EventModel extends RepresentationModel<EventModel> {
     }
 
     public EventModel(Event event) {
-        this.eventType = event.getEventType();
+        this.eventType = eventTypeModelAssembler.toModel(event.getEventType());
         this.eventName = event.getEventName();
         this.dateOfEvent = event.getDateOfEvent();
         this.stadiumOfEvent = stadiumModelAssembler.toModel(event.getStadiumOfEvent());

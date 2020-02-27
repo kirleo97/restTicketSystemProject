@@ -2,29 +2,28 @@ package com.example.RestTicketSystem.controller;
 
 import com.example.RestTicketSystem.assembler.EventModelAssembler;
 import com.example.RestTicketSystem.domain.Event;
-import com.example.RestTicketSystem.domain.EventType;
-import com.example.RestTicketSystem.domain.Manager;
-import com.example.RestTicketSystem.domain.Stadium;
-import com.example.RestTicketSystem.error.exception.notFound.EventNotFoundException;
+import com.example.RestTicketSystem.error.exception.EventDataException;
+import com.example.RestTicketSystem.error.exception.ResourceAlreadyExistsException;
 import com.example.RestTicketSystem.model.EventModel;
 import com.example.RestTicketSystem.service.EventService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping(path = "/event", produces = MediaType.APPLICATION_JSON_VALUE)
 @CrossOrigin(origins = "*")
+@Validated
 public class EventController {
     private final EventService eventService;
 
@@ -34,76 +33,80 @@ public class EventController {
     }
 
     @GetMapping
-    public CollectionModel<EventModel> getAllEvents() {
+    public ResponseEntity<CollectionModel<EventModel>> getAllEvents() {
         List<Event> events = eventService.findAll();
         CollectionModel<EventModel> collectionModel = new EventModelAssembler(EventController.class, EventModel.class).toCollectionModel(events);
         collectionModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EventController.class).getAllEvents()).withRel("allEvents"));
-        return collectionModel;
+        return ResponseEntity.ok(collectionModel);
     }
 
     @GetMapping("{id}")
-    public EntityModel<EventModel> getEventById(@PathVariable Integer id) {
-        //return eventService.findById(id).orElseThrow(() -> new EventNotFoundException(id));
-        Event event = eventService.findById(id).orElseThrow(() -> new EventNotFoundException(id));
+    public ResponseEntity<EventModel> getEventById(@PathVariable @Min(1) Integer id) {
+        Event event = eventService.findById(id);
         EventModel eventModel = new EventModel(event);
-        EntityModel<EventModel> entityModel = new EntityModel<>(eventModel, WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EventController.class).getEventById(id)).withRel("eventById"));
-        return entityModel;
+        eventModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EventController.class).getEventById(id)).withRel("eventById"));
+        return ResponseEntity.ok(eventModel);
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping(consumes = "application/json")
-    public Event createEvent(@RequestBody Event event) {
-        return eventService.saveEvent(event);
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<EventModel> createEvent(@Valid @RequestBody Event event) throws ResourceAlreadyExistsException, EventDataException {
+        Integer id = event.getId();
+        if (id != null && eventService.existsById(id)) {
+            throw new ResourceAlreadyExistsException("Event with ID [" + event.getId() + "] is already exist!");
+        }
+        Event savedEvent = eventService.saveEvent(event);
+        EventModel eventModel = new EventModel(savedEvent);
+        eventModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EventController.class).getEventById(savedEvent.getId())).withRel("createdEvent"));
+        return new ResponseEntity<>(eventModel, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public Event putEvent(@RequestBody Event newEvent, @PathVariable Integer id) {
-        Event event = eventService.findById(id).orElse(null);
-        if (event != null) {
-            event.setEventType(newEvent.getEventType());
-            event.setEventName(newEvent.getEventName());
-            event.setDateOfEvent(newEvent.getDateOfEvent());
-            event.setStadiumOfEvent(newEvent.getStadiumOfEvent());
-            event.setStartOfPreparationOfStadium(newEvent.getStartOfPreparationOfStadium());
-            event.setEndOfDismantleOfStadium(newEvent.getEndOfDismantleOfStadium());
-            event.setEventManager(newEvent.getEventManager());
-            return eventService.saveEvent(event);
+    public ResponseEntity<EventModel> putEvent(@Valid @RequestBody Event newEvent, @PathVariable @Min(1) Integer id) throws EventDataException {
+        if (eventService.existsById(id)) {
+            Event event = eventService.findById(id);
+            BeanUtils.copyProperties(newEvent, event);
+            event.setId(id);
+            Event updatedEvent = eventService.saveEvent(event);
+            EventModel eventModel = new EventModel(updatedEvent);
+            eventModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EventController.class).getEventById(id)).withRel("updatedEvent"));
+            return ResponseEntity.ok(eventModel);
+        } else {
+            Event savedEvent = eventService.saveEvent(newEvent);
+            return new ResponseEntity<>(new EventModel(savedEvent).add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EventController.class).getEventById(savedEvent.getId())).withRel("createdEvent")), HttpStatus.CREATED);
         }
-        return eventService.saveEvent(newEvent);
     }
 
-    @PatchMapping(value = "/{id}", consumes = "application/json")
-    public Event patchEvent(@RequestBody Map<String, Object> update, @PathVariable Integer id) {
-        Event event = eventService.findById(id).orElseThrow(() -> new EventNotFoundException(id));
-        if (update.containsKey("eventType")) {
-            event.setEventType((EventType) update.get("eventType"));
+    @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<EventModel> patchEvent(@Valid @RequestBody Event patchEvent, @PathVariable @Min(1) Integer id) throws EventDataException {
+        Event event = eventService.findById(id);
+        if (patchEvent.getEventType() != null) {
+            event.setEventType(patchEvent.getEventType());
         }
-        if (update.containsKey("eventName")) {
-            event.setEventName((String) update.get("eventName"));
+        if (patchEvent.getEventName() != null) {
+            event.setEventName(patchEvent.getEventName());
         }
-        if (update.containsKey("dateOfEvent")) {
-            event.setDateOfEvent((LocalDateTime) update.get("dateOfEvent"));
+        if (patchEvent.getDateOfEvent() != null) {
+            event.setDateOfEvent(patchEvent.getDateOfEvent());
         }
-        if (update.containsKey("stadiumOfEvent")) {
-            event.setStadiumOfEvent((Stadium) update.get("stadiumOfEvent"));
+        if (patchEvent.getStadiumOfEvent() != null) {
+            event.setStadiumOfEvent(patchEvent.getStadiumOfEvent());
         }
-        if (update.containsKey("startOfPreparationOfStadium")) {
-            event.setStartOfPreparationOfStadium((LocalDate) update.get("startOfPreparationOfStadium"));
+        if (patchEvent.getStartOfPreparationOfStadium() != null) {
+            event.setStartOfPreparationOfStadium(patchEvent.getStartOfPreparationOfStadium());
         }
-        if (update.containsKey("endOfDismantleOfStadium")) {
-            event.setEndOfDismantleOfStadium((LocalDate) update.get("endOfDismantleOfStadium"));
+        if (patchEvent.getEndOfDismantleOfStadium() != null) {
+            event.setEndOfDismantleOfStadium(patchEvent.getEndOfDismantleOfStadium());
         }
-        if (update.containsKey("eventManager")) {
-            event.setEventManager((Manager) update.get("eventManager"));
+        if (patchEvent.getEventManager() != null) {
+            event.setEventManager(patchEvent.getEventManager());
         }
-        return eventService.saveEvent(event);
+        Event updatedEvent = eventService.saveEvent(event);
+        return ResponseEntity.ok(new EventModel(updatedEvent).add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EventController.class).getEventById(id)).withRel("updatedEvent")));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    public void deleteEvent(@PathVariable Integer id) {
-        try {
-            eventService.deleteById(id);
-        } catch (EmptyResultDataAccessException e) { }
+    public void deleteEvent(@PathVariable @Min(1) Integer id) {
+        eventService.deleteById(id);
     }
 }

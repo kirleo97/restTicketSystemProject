@@ -1,5 +1,6 @@
 package com.example.RestTicketSystem.error;
 
+import com.example.RestTicketSystem.error.exception.EventDataException;
 import com.example.RestTicketSystem.error.exception.ResourceAlreadyExistsException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -12,9 +13,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.ConstraintViolationException;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -33,20 +31,31 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
 
     @ExceptionHandler({ResourceNotFoundException.class})
     public ResponseEntity<CustomErrorResponse> customHandleNotFound(Exception ex) {
-        CustomErrorResponse errors = new CustomErrorResponse();
-        errors.setTimestamp(LocalDateTime.now());
-        errors.setError(ex.getMessage());
-        errors.setStatus(HttpStatus.NOT_FOUND.value());
-        return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
+        CustomErrorResponse error = new CustomErrorResponse();
+        error.setTimestamp(LocalDateTime.now());
+        error.getErrors().add(ex.getMessage());
+        error.setStatus(HttpStatus.NOT_FOUND.value());
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler({ResourceAlreadyExistsException.class})
     public ResponseEntity<CustomErrorResponse> customHandleExist(Exception ex) {
-        CustomErrorResponse errors = new CustomErrorResponse();
-        errors.setTimestamp(LocalDateTime.now());
-        errors.setError(ex.getMessage());
-        errors.setStatus(HttpStatus.BAD_REQUEST.value());
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        CustomErrorResponse error = new CustomErrorResponse();
+        error.setTimestamp(LocalDateTime.now());
+        error.getErrors().add(ex.getMessage());
+        error.setStatus(HttpStatus.BAD_REQUEST.value());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({EventDataException.class})
+    public ResponseEntity<CustomErrorResponse> customHandleEventData(EventDataException eventDataException) {
+        CustomErrorResponse error = new CustomErrorResponse();
+        error.setTimestamp(LocalDateTime.now());
+        for (Exception e : eventDataException.getExceptions()) {
+            error.getErrors().add(e.getMessage());
+        }
+        error.setStatus(HttpStatus.BAD_REQUEST.value());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     /*@ExceptionHandler(ConstraintViolationException.class)

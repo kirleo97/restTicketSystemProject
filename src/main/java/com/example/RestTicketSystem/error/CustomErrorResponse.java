@@ -3,12 +3,14 @@ package com.example.RestTicketSystem.error;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CustomErrorResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
     private LocalDateTime timestamp;
     private int status;
-    private String error;
+    private List<String> errors = new ArrayList<>();
 
     public LocalDateTime getTimestamp() {
         return timestamp;
@@ -26,11 +28,11 @@ public class CustomErrorResponse {
         this.status = status;
     }
 
-    public String getError() {
-        return error;
+    public List<String> getErrors() {
+        return errors;
     }
 
-    public void setError(String error) {
-        this.error = error;
+    public void setErrors(List<String> errors) {
+        this.errors = errors;
     }
 }

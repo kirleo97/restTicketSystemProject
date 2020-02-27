@@ -1,16 +1,16 @@
 package com.example.RestTicketSystem.service;
 
 import com.example.RestTicketSystem.domain.Event;
+import com.example.RestTicketSystem.error.exception.EventDataException;
 import com.example.RestTicketSystem.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class EventService {
@@ -21,13 +21,37 @@ public class EventService {
         this.eventRepository = eventRepository;
     }
 
-    public Optional<Event> findById(Integer id) { return eventRepository.findById(id); }
+    public boolean existsById(Integer id) {
+        return eventRepository.existsById(id);
+    }
+
+    public Event findById(Integer id) {
+        Event event = eventRepository.findById(id).orElse(null);
+        if (event == null) {
+            throw new ResourceNotFoundException("Event with ID " + id + " doesn't exist!");
+        }  else {
+            return event;
+        }
+    }
 
     public List<Event> findAll() {
         return eventRepository.findAll();
     }
 
-    public Event saveEvent(Event event) {
+    public Event saveEvent(Event event) throws EventDataException {
+        List<Exception> potentialExceptions = new ArrayList<>();
+        if (!checkIfDateOfEventIsInPeriodOfPreparationAndDismantle(event)) {
+            potentialExceptions.add(new Exception("The date of the event must be included in the period of preparation and completion of the event ( " + event.getDateOfEvent() + ")"));
+        }
+        if (!checkIfStartOfPreparationIsBeforeEndOfDismantleOrEquals(event)) {
+            potentialExceptions.add(new Exception("The start of preparation must be before the end of dismantle"));
+        }
+        if (checkIfPeriodOfEventIntersectWithOtherEventsOfStadium(event)) {
+            potentialExceptions.add(new Exception("The selected period of the event overlaps with the holding of other events: " + event.getStartOfPreparationOfStadium() + " - " + event.getEndOfDismantleOfStadium()));
+        }
+        if (potentialExceptions.size() > 0) {
+            throw new EventDataException(potentialExceptions);
+        }
         return eventRepository.save(event);
     }
 
@@ -35,24 +59,22 @@ public class EventService {
         eventRepository.deleteById(id);
     }
 
-    public void checkIfDateOfEventIsInPeriodOfPreparationAndDismantle(Event event, BindingResult bindingResult) {
+    public boolean checkIfDateOfEventIsInPeriodOfPreparationAndDismantle(Event event) {
         LocalDate dateOfEvent = LocalDate.from(event.getDateOfEvent());
-        if (dateOfEvent.isBefore(event.getStartOfPreparationOfStadium()) || dateOfEvent.isAfter(event.getEndOfDismantleOfStadium())) {
-            bindingResult.addError(new FieldError("event", "dateOfEvent", "The date of the event must be included in the period of preparation and completion of the event ( " + dateOfEvent + ")"));
-        }
+        return dateOfEvent.isBefore(event.getStartOfPreparationOfStadium()) || dateOfEvent.isAfter(event.getEndOfDismantleOfStadium()) ? false : true;
     }
 
-    public void checkIfStartOfPreparationIsBeforeEndOfDismantleOrEquals(Event event, BindingResult bindingResult) {
-        if (Period.between(event.getStartOfPreparationOfStadium(), event.getEndOfDismantleOfStadium()).isNegative()) {
-            bindingResult.addError(new FieldError("event", "endOfDismantleOfStadium", "The selected period is not possible, since the beginning of the period should not be after its end ( " + event.getStartOfPreparationOfStadium() + " - " + event.getEndOfDismantleOfStadium()));
-        }
+    public boolean checkIfStartOfPreparationIsBeforeEndOfDismantleOrEquals(Event event) {
+        return Period.between(event.getStartOfPreparationOfStadium(), event.getEndOfDismantleOfStadium()).isNegative() ? false : true;
     }
 
-    public void checkIfPeriodOfEventIsNotIntersectWithOtherEventsOfStadium(Event checkEvent, BindingResult bindingResult) {
+    public boolean checkIfPeriodOfEventIntersectWithOtherEventsOfStadium(Event checkEvent) {
         List<Event> otherEventsByStadium = eventRepository.findAllByStadiumOfEvent(checkEvent.getStadiumOfEvent());
         if (checkEvent.getId() != null) {
-            Event event = findById(checkEvent.getId()).get();
-            otherEventsByStadium.remove(event);
+            if (existsById(checkEvent.getId())) {
+                Event event = findById(checkEvent.getId());
+                otherEventsByStadium.remove(event);
+            }
         }
         LocalDate startOfCheckEvent = checkEvent.getStartOfPreparationOfStadium();
         LocalDate endOfCheckEvent = checkEvent.getEndOfDismantleOfStadium();
@@ -61,7 +83,7 @@ public class EventService {
         for (Event event : otherEventsByStadium) {
             startOfOtherEvent = event.getStartOfPreparationOfStadium();
             endOfOtherEvent = event.getEndOfDismantleOfStadium();
-            if (startOfCheckEvent.isBefore(startOfOtherEvent)) {
+            /*if (startOfCheckEvent.isBefore(startOfOtherEvent)) {
                 if (!endOfCheckEvent.isBefore(startOfOtherEvent)) {
                     bindingResult.addError(new FieldError("checkEvent", "endOfDismantleOfStadium", "The selected period of the event overlaps with the holding of other events: " + startOfOtherEvent + " - " + endOfOtherEvent));
                 }
@@ -73,13 +95,17 @@ public class EventService {
             }
             if (startOfCheckEvent.isEqual(startOfOtherEvent)) {
                 bindingResult.addError(new FieldError("checkEvent", "startOfPreparationOfStadium", "The selected period of the event overlaps with the holding of other events: " + startOfOtherEvent + " - " + endOfOtherEvent));
+            }*/
+            if ( (startOfCheckEvent.isBefore(startOfOtherEvent) && !endOfCheckEvent.isBefore(startOfOtherEvent)) || (startOfCheckEvent.isAfter(startOfOtherEvent) && !startOfCheckEvent.isAfter(endOfOtherEvent)) || startOfCheckEvent.isEqual(startOfOtherEvent)) {
+                return true;
             }
         }
+        return false;
     }
 
-    public void checkValidationFormForEvent(Event event, BindingResult bindingResult) {
+    /*public void checkValidationFormForEvent(Event event, BindingResult bindingResult) {
         checkIfDateOfEventIsInPeriodOfPreparationAndDismantle(event, bindingResult);
-        checkIfPeriodOfEventIsNotIntersectWithOtherEventsOfStadium(event, bindingResult);
+        checkIfPeriodOfEventIntersectWithOtherEventsOfStadium(event, bindingResult);
         checkIfStartOfPreparationIsBeforeEndOfDismantleOrEquals(event, bindingResult);
-    }
+    }*/
 }

@@ -19,40 +19,40 @@ public class Event {
     @Column(name = "EVENT_ID")
     private Integer id;
 
-    @NotNull
+    @NotNull(message = "You have to choose type of event")
     @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "EVENT_EVENTTYPE", nullable = false)
     private EventType eventType;
 
-    @NotBlank
-    @Length(min = 2)
+    @NotBlank(message = "The event's name field can't be empty!")
+    @Length(min = 2,  message = "The length must be more than 1 letter")
     @Column(name = "EVENT_NAME", nullable = false)
     private String eventName;
 
-    @NotNull
+    @NotNull(message = "You have to choose date of event")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     @Future(message = "The event cannot be held earlier than the current date. Please enter other information.")
     @Column(name = "EVENT_DATE", nullable = false)
     private LocalDateTime dateOfEvent;
 
-    @NotNull
+    @NotNull(message = "You have to choose stadium of event")
     @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "STADIUM_ID", nullable = false)
     private Stadium stadiumOfEvent;
 
-    @NotNull
+    @NotNull(message = "You have to choose start of preparation period of event")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Future(message = "Preparation for the event cannot begin earlier than the current date. Please enter other information.")
+    @Future(message = "Preparation for the event can't begin earlier than the current date. Please enter other information.")
     @Column(name = "event_startOfPreparationOfStadium", nullable = false)
     private LocalDate startOfPreparationOfStadium;
 
-    @NotNull
+    @NotNull(message = "You have to choose end of preparation period of event")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Future(message = "The dismantling of the arena could not be completed earlier than the current date. Please enter other information.")
     @Column(name = "event_endOfDismantleOfStadium", nullable = false)
     private LocalDate endOfDismantleOfStadium;
 
-    @NotNull
+    @NotNull(message = "You have to choose manager of event")
     @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "MANAGER_ID", nullable = false)
     private Manager eventManager;
