@@ -5,6 +5,7 @@ import com.example.RestTicketSystem.model.ManagerModel;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 
 public class ManagerModelAssembler extends RepresentationModelAssemblerSupport<Manager, ManagerModel> {
+
     public ManagerModelAssembler(Class<?> controllerClass, Class<ManagerModel> resourceType) {
         super(controllerClass, resourceType);
     }

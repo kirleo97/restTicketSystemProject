@@ -18,8 +18,8 @@ public class Manager {
 
     @Pattern(message = "The value must start with a capital letter, followed by only lowercase letters. Irregular shape: ${validatedValue}",
             regexp = "^[A-Z][a-z]*(\\s(([a-z]{1,3})|(([a-z]+\\')?[A-Z][a-z]*)))*$")
-    @Length(min = 2, max = 100)
-    @NotBlank
+    @Length(min = 2, max = 100, message = "The length must be between 2 and 100 letters")
+    @NotBlank(message = "Please provide a name for Manager")
     @Column(name = "MANAGER_NAME", nullable = false)
     private String managerName;
 

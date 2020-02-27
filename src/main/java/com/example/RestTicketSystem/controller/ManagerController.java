@@ -2,24 +2,27 @@ package com.example.RestTicketSystem.controller;
 
 import com.example.RestTicketSystem.assembler.ManagerModelAssembler;
 import com.example.RestTicketSystem.domain.Manager;
-import com.example.RestTicketSystem.error.exception.notFound.ManagerNotFoundException;
+import com.example.RestTicketSystem.error.exception.ResourceAlreadyExistsException;
 import com.example.RestTicketSystem.model.ManagerModel;
 import com.example.RestTicketSystem.service.ManagerService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping(path = "/manager", produces = MediaType.APPLICATION_JSON_VALUE)
 @CrossOrigin(origins = "*")
+@Validated
 public class ManagerController {
     private final ManagerService managerService;
 
@@ -29,72 +32,65 @@ public class ManagerController {
     }
 
     @GetMapping
-    public CollectionModel<ManagerModel> getAllManagers() {
+    public ResponseEntity<CollectionModel<ManagerModel>> getAllManagers() {
         List<Manager> managers = managerService.findAll();
         CollectionModel<ManagerModel> collectionModel = new ManagerModelAssembler(ManagerController.class, ManagerModel.class).toCollectionModel(managers);
         collectionModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(ManagerController.class).getAllManagers()).withRel("allManagers"));
-        return collectionModel;
+        return ResponseEntity.ok(collectionModel);
     }
 
     @GetMapping("/{id}")
-    public EntityModel<ManagerModel> getManagerById(@PathVariable Integer id) {
-        //return managerService.findById(id).orElseThrow(() -> new ManagerNotFoundException(id));
-        Manager manager = managerService.findById(id).orElseThrow(() -> new ManagerNotFoundException(id));
+    public ResponseEntity<ManagerModel> getManagerById(@PathVariable @Min(1) Integer id) {
+        Manager manager = managerService.findById(id);
         ManagerModel managerModel = new ManagerModel(manager);
-        EntityModel<ManagerModel> entityModel = new EntityModel<>(managerModel, WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(ManagerController.class).getManagerById(id)).withRel("eventTypeById"));
-        return entityModel;
+        managerModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(ManagerController.class).getManagerById(id)).withRel("managerById"));
+        return ResponseEntity.ok(managerModel);
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping(consumes = "application/json")
-    public Manager createManager(@RequestBody Manager manager) {
-        return managerService.saveManager(manager);
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ManagerModel> createManager(@Valid @RequestBody Manager manager) throws ResourceAlreadyExistsException {
+        Integer id = manager.getId();
+        if (id != null && managerService.existsById(id)) {
+            throw new ResourceAlreadyExistsException("Manager with ID [" + manager.getId() + "] is already exist!");
+        }
+        Manager savedManager = managerService.saveManager(manager);
+        ManagerModel managerModel = new ManagerModel(savedManager);
+        managerModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(ManagerController.class).getManagerById(savedManager.getId())).withRel("createdManager"));
+        return new ResponseEntity<>(managerModel, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public Manager putManager(@RequestBody Manager newManager, @PathVariable Integer id) {
-        Manager manager = managerService.findById(id).orElse(null);
-        if (manager != null) {
-            manager.setManagerName(newManager.getManagerName());
-            manager.setManagerTelephoneNumber(newManager.getManagerTelephoneNumber());
-            return managerService.saveManager(manager);
+    public ResponseEntity<ManagerModel> putManager(@Valid @RequestBody Manager newManager, @PathVariable @Min(1) Integer id) throws ResourceAlreadyExistsException {
+        if (managerService.existsById(id)) {
+            Manager manager = managerService.findById(id);
+            BeanUtils.copyProperties(newManager, manager);
+            manager.setId(id);
+            Manager updatedManager = managerService.saveManager(manager);
+            ManagerModel managerModel = new ManagerModel(updatedManager);
+            managerModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(ManagerController.class).getManagerById(id)).withRel("updatedManager"));
+            return ResponseEntity.ok(managerModel);
+        } else {
+            Manager savedManager = managerService.saveManager(newManager);
+            return new ResponseEntity<>(new ManagerModel(savedManager).add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(ManagerController.class).getManagerById(savedManager.getId())).withRel("savedManager")), HttpStatus.CREATED);
         }
-        return managerService.saveManager(newManager);
     }
 
-    @PatchMapping(value = "/{id}", consumes = "application/json")
-    public Manager patchManager(@RequestBody Map<String, Object> update, @PathVariable Integer id) {
-        Manager manager = managerService.findById(id).orElseThrow(() -> new ManagerNotFoundException(id));
-        if (update.containsKey("managerName")) {
-            manager.setManagerName((String) update.get("managerName"));
-        }
-        if (update.containsKey("managerTelephoneNumber")) {
-            manager.setManagerTelephoneNumber((String) update.get("managerTelephoneNumber"));
-        }
-        return managerService.saveManager(manager);
-    }
-
-    /*@PatchMapping(value = "/{id}", consumes = "application/json")
-    public Manager patchManager(@PathVariable Integer id, @RequestBody Manager patchManager) {
-        Manager manager = managerService.findById(id).orElseThrow(() -> new ManagerNotFoundException(id));
-        //Set<String> fields = new HashSet<>();
+    @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ManagerModel> patchManager(@Valid @RequestBody Manager patchManager, @PathVariable @Min(1) Integer id) throws ResourceAlreadyExistsException {
+        Manager manager = managerService.findById(id);
         if (patchManager.getManagerName() != null) {
             manager.setManagerName(patchManager.getManagerName());
         }
         if (patchManager.getManagerTelephoneNumber() != null) {
             manager.setManagerTelephoneNumber(patchManager.getManagerTelephoneNumber());
         }
-        *//*if (fields.size() != 0) {
-            throw new ManagerUnsupportedFieldPatchException(fields);
-        }*//*
-        return managerService.saveManager(manager);
-    }*/
+        Manager updatedManager = managerService.saveManager(manager);
+        return ResponseEntity.ok(new ManagerModel(updatedManager).add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(ManagerController.class).getManagerById(updatedManager.getId())).withRel("updatedManager")));
+    }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    public void deleteManager(@PathVariable Integer id) {
-        try {
-            managerService.deleteById(id);
-        } catch (EmptyResultDataAccessException e) { }
+    public void deleteManager(@PathVariable @Min(1) Integer id) {
+        managerService.deleteById(id);
     }
 }

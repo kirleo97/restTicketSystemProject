@@ -30,8 +30,9 @@ public class EventTypeService {
         EventType eventType = eventTypeRepository.findById(id).orElse(null);
         if (eventType == null) {
             throw new ResourceNotFoundException("EventType with ID " + id + " doesn't exist!");
-        } else
+        } else {
             return eventType;
+        }
     }
 
     public List<EventType> findAll() {
@@ -65,11 +66,11 @@ public class EventTypeService {
         eventTypeRepository.deleteById(id);
     }
 
-    public EntityModel<EventTypeModel> getEntityModel(EventType eventType, String relation) {
+    /*public EntityModel<EventTypeModel> getEntityModel(EventType eventType, String relation) {
         EventTypeModel eventTypeModel = new EventTypeModel(eventType);
         EntityModel<EventTypeModel> entityModel = new EntityModel<>(eventTypeModel, WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EventTypeController.class).getEventTypeById(eventType.getId())).withRel(relation));
         return entityModel;
-    }
+    }*/
 
     /*public boolean isValidationForEventTypeSuccessful(EventType eventType, BindingResult bindingResult) {
         EventType checkEventType = eventTypeRepository.findByEventTypeName(eventType.getEventTypeName());

@@ -75,7 +75,7 @@ public class EventTypeController {
         }
     }
 
-    @PatchMapping(value = "/{id}", consumes = "application/json")
+    @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<EventTypeModel> patchEventType(@Valid @RequestBody EventType patchEventType, @PathVariable @Min(1) Integer id) throws ResourceAlreadyExistsException {
         EventType eventType = eventTypeService.findById(id);
         if (patchEventType.getEventTypeName() != null) {
@@ -87,7 +87,7 @@ public class EventTypeController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    public void deleteEventType(@PathVariable Integer id) {
+    public void deleteEventType(@PathVariable @Min(1) Integer id) {
         eventTypeService.deleteById(id);
     }
 }
