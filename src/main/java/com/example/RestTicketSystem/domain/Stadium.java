@@ -15,8 +15,8 @@ public class Stadium {
     @Column(name = "STADIUM_ID")
     private Integer id;
 
-    @Length(min = 2, max = 100)
-    @NotBlank
+    @Length(min = 2, max = 100, message = "The length must be between 2 and 100 letters")
+    @NotBlank(message = "The stadium's name field can't be empty!")
     @Column(name = "STADIUM_NAME", unique = true, nullable = false)
     private String stadiumName;
 

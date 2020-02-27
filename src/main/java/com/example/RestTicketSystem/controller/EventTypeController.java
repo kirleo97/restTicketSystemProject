@@ -82,7 +82,7 @@ public class EventTypeController {
             eventType.setEventTypeName(patchEventType.getEventTypeName());
         }
         EventType updatedEventType = eventTypeService.saveEventType(eventType);
-        return ResponseEntity.ok(new EventTypeModel(updatedEventType).add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EventTypeController.class).getEventTypeById(updatedEventType.getId())).withRel("updatedEventType")));
+        return ResponseEntity.ok(new EventTypeModel(updatedEventType).add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EventTypeController.class).getEventTypeById(id)).withRel("updatedEventType")));
     }
 
     @DeleteMapping("/{id}")

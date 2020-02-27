@@ -85,7 +85,7 @@ public class ManagerController {
             manager.setManagerTelephoneNumber(patchManager.getManagerTelephoneNumber());
         }
         Manager updatedManager = managerService.saveManager(manager);
-        return ResponseEntity.ok(new ManagerModel(updatedManager).add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(ManagerController.class).getManagerById(updatedManager.getId())).withRel("updatedManager")));
+        return ResponseEntity.ok(new ManagerModel(updatedManager).add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(ManagerController.class).getManagerById(id)).withRel("updatedManager")));
     }
 
     @DeleteMapping("/{id}")

@@ -5,6 +5,7 @@ import com.example.RestTicketSystem.model.StadiumModel;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 
 public class StadiumModelAssembler extends RepresentationModelAssemblerSupport<Stadium, StadiumModel> {
+
     public StadiumModelAssembler(Class<?> controllerClass, Class<StadiumModel> resourceType) {
         super(controllerClass, resourceType);
     }

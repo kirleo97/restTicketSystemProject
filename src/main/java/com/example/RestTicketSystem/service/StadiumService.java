@@ -2,14 +2,15 @@ package com.example.RestTicketSystem.service;
 
 import com.example.RestTicketSystem.domain.EventType;
 import com.example.RestTicketSystem.domain.Stadium;
+import com.example.RestTicketSystem.error.exception.ResourceAlreadyExistsException;
 import com.example.RestTicketSystem.repository.StadiumRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class StadiumService {
@@ -20,19 +21,40 @@ public class StadiumService {
         this.stadiumRepository = stadiumRepository;
     }
 
-    public Optional<Stadium> findById(Integer id) {
-        return stadiumRepository.findById(id);
+    public boolean existsById(Integer id) {
+        return stadiumRepository.existsById(id);
+    }
+
+    public Stadium findById(Integer id) {
+        Stadium stadium = stadiumRepository.findById(id).orElse(null);
+        if (stadium == null) {
+            throw new ResourceNotFoundException("Stadium with ID " + id + " doesn't exist!");
+        }  else {
+            return stadium;
+        }
+    }
+
+    public Stadium findByName(String stadiumName) {
+        return stadiumRepository.findByStadiumName(stadiumName);
     }
 
     public List<Stadium> findAll() {
         return stadiumRepository.findAll();
     }
 
-    public Stadium saveStadium(Stadium stadium) {
+    public Stadium saveStadium(Stadium stadium) throws ResourceAlreadyExistsException {
+        String stadiumName = stadium.getStadiumName();
+        Stadium checkStadium = findByName(stadiumName);
+        if ( (checkStadium != null) && (!checkStadium.getId().equals(stadium.getId())) ) {
+            throw new ResourceAlreadyExistsException("Stadium with name [" + stadiumName + "] is already exist!");
+        }
         return stadiumRepository.save(stadium);
     }
 
     public void deleteById(Integer id) {
+        if (!existsById(id)) {
+            throw new ResourceNotFoundException("Manager with ID " + id + " doesn't exist!");
+        }
         stadiumRepository.deleteById(id);
     }
 

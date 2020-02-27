@@ -23,7 +23,7 @@ public class Manager {
     @Column(name = "MANAGER_NAME", nullable = false)
     private String managerName;
 
-    @NotBlank(message = "The phone number field cannot be empty!")
+    @NotBlank(message = "The phone number field can't be empty!")
     @Digits(integer = 11, fraction = 0, message = "The entered number does not match the specified form!")
     @Column(name = "MANAGER_TELEPHONE_NUMBER", unique = true, nullable = false)
     private String managerTelephoneNumber;
