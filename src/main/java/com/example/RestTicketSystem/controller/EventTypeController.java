@@ -50,33 +50,36 @@ public class EventTypeController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<EntityModel<EventTypeModel>> createEventType(@Valid @RequestBody EventType eventType) throws ResourceAlreadyExistsException {
-        if (eventType.getId() != null && eventTypeService.existsById(eventType.getId())) {
+        Integer id = eventType.getId();
+        if (id != null && eventTypeService.existsById(id)) {
             throw new ResourceAlreadyExistsException("EventType with ID [" + eventType.getId() + "] is already exist!");
         }
-        EventTypeModel eventTypeModel = new EventTypeModel(eventTypeService.saveEventType(eventType));
-        EntityModel<EventTypeModel> entityModel = new EntityModel<>(eventTypeModel, WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EventTypeController.class).getEventTypeById(eventType.getId())).withRel("creationEventType"));
+        EventType savedEventType = eventTypeService.saveEventType(eventType);
+        EntityModel<EventTypeModel> entityModel = eventTypeService.getEntityModel(savedEventType, "createdEventType");
         return new ResponseEntity<>(entityModel, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public EventType putEventType(@Valid @RequestBody EventType newEventType, @PathVariable @Min(1) Integer id) throws ResourceAlreadyExistsException {
+    public ResponseEntity<EntityModel<EventTypeModel>> putEventType(@Valid @RequestBody EventType newEventType, @PathVariable @Min(1) Integer id) throws ResourceAlreadyExistsException {
         if (eventTypeService.existsById(id)) {
             EventType eventType = eventTypeService.findById(id);
             BeanUtils.copyProperties(newEventType, eventType);
             eventType.setId(id);
-            return eventTypeService.saveEventType(eventType);
+            EventType savedEventType = eventTypeService.saveEventType(eventType);
+            EntityModel<EventTypeModel> entityModel = eventTypeService.getEntityModel(savedEventType, "updatedEventType");
+            return ResponseEntity.ok(entityModel);
         } else {
-            return eventTypeService.saveEventType(newEventType);
+            return new ResponseEntity<>(eventTypeService.getEntityModel(eventTypeService.saveEventType(newEventType), "createdEventType"), HttpStatus.CREATED);
         }
     }
 
     @PatchMapping(value = "/{id}", consumes = "application/json")
-    public EventType patchEventType(@Valid @RequestBody EventType patchEventType, @PathVariable @Min(1) Integer id) throws ResourceAlreadyExistsException {
+    public ResponseEntity<EntityModel<EventTypeModel>> patchEventType(@Valid @RequestBody EventType patchEventType, @PathVariable @Min(1) Integer id) throws ResourceAlreadyExistsException {
         EventType eventType = eventTypeService.findById(id);
         if (patchEventType.getEventTypeName() != null) {
             eventType.setEventTypeName(patchEventType.getEventTypeName());
         }
-        return eventTypeService.saveEventType(eventType);
+        return ResponseEntity.ok(eventTypeService.getEntityModel(eventTypeService.saveEventType(eventType), "updatedEventType"));
     }
 
     @DeleteMapping("/{id}")

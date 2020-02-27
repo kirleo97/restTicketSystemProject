@@ -1,10 +1,14 @@
 package com.example.RestTicketSystem.service;
 
+import com.example.RestTicketSystem.controller.EventTypeController;
 import com.example.RestTicketSystem.domain.EventType;
 import com.example.RestTicketSystem.error.exception.ResourceAlreadyExistsException;
+import com.example.RestTicketSystem.model.EventTypeModel;
 import com.example.RestTicketSystem.repository.EventTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -59,6 +63,12 @@ public class EventTypeService {
             throw new ResourceNotFoundException("EventType with ID " + id + " doesn't exist!");
         }
         eventTypeRepository.deleteById(id);
+    }
+
+    public EntityModel<EventTypeModel> getEntityModel(EventType eventType, String relation) {
+        EventTypeModel eventTypeModel = new EventTypeModel(eventType);
+        EntityModel<EventTypeModel> entityModel = new EntityModel<>(eventTypeModel, WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EventTypeController.class).getEventTypeById(eventType.getId())).withRel(relation));
+        return entityModel;
     }
 
     /*public boolean isValidationForEventTypeSuccessful(EventType eventType, BindingResult bindingResult) {
