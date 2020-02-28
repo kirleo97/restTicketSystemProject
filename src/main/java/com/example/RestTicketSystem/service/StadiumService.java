@@ -1,14 +1,11 @@
 package com.example.RestTicketSystem.service;
 
-import com.example.RestTicketSystem.domain.EventType;
 import com.example.RestTicketSystem.domain.Stadium;
 import com.example.RestTicketSystem.error.exception.ResourceAlreadyExistsException;
 import com.example.RestTicketSystem.repository.StadiumRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 
 import java.util.List;
 
@@ -58,7 +55,7 @@ public class StadiumService {
         stadiumRepository.deleteById(id);
     }
 
-    public boolean isValidationForCreateStadiumSuccessful(Stadium stadium, BindingResult bindingResult) {
+    /*public boolean isValidationForCreateStadiumSuccessful(Stadium stadium, BindingResult bindingResult) {
         String stadiumName = stadium.getStadiumName();
         if(isStadiumWithDefinedNameExist(stadiumName)) {
             bindingResult.addError(new FieldError("stadium", "stadiumName", "Stadium with name '" + stadiumName + "' already exists. Please enter a different name"));
@@ -76,13 +73,13 @@ public class StadiumService {
             }
         }
         return true;
-    }
+    }*/
 
-    public boolean isStadiumWithDefinedNameExist(String stadiumName) {
+    /*public boolean isStadiumWithDefinedNameExist(String stadiumName) {
         return stadiumRepository.findByStadiumName(stadiumName) != null;
     }
 
     public List<Stadium> findAllStadiumsByEventType(EventType eventType) {
         return stadiumRepository.findAllByEventTypes(eventType);
-    }
+    }*/
 }

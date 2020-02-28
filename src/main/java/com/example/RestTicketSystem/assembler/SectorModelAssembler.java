@@ -5,6 +5,7 @@ import com.example.RestTicketSystem.model.SectorModel;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 
 public class SectorModelAssembler extends RepresentationModelAssemblerSupport<Sector, SectorModel> {
+
     public SectorModelAssembler(Class<?> controllerClass, Class<SectorModel> resourceType) {
         super(controllerClass, resourceType);
     }

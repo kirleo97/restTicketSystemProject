@@ -2,25 +2,27 @@ package com.example.RestTicketSystem.controller;
 
 import com.example.RestTicketSystem.assembler.SectorModelAssembler;
 import com.example.RestTicketSystem.domain.Sector;
-import com.example.RestTicketSystem.domain.Stadium;
-import com.example.RestTicketSystem.error.exception.notFound.SectorNotFoundException;
+import com.example.RestTicketSystem.error.exception.ResourceAlreadyExistsException;
 import com.example.RestTicketSystem.model.SectorModel;
 import com.example.RestTicketSystem.service.SectorService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping(path = "/sector", produces = MediaType.APPLICATION_JSON_VALUE)
 @CrossOrigin(origins = "*")
+@Validated
 public class SectorController {
     private final SectorService sectorService;
 
@@ -30,59 +32,68 @@ public class SectorController {
     }
 
     @GetMapping
-    public CollectionModel<SectorModel> getAllSectors() {
+    public ResponseEntity<CollectionModel<SectorModel>> getAllSectors() {
         List<Sector> sectors = sectorService.findAll();
         CollectionModel<SectorModel> collectionModel = new SectorModelAssembler(SectorController.class, SectorModel.class).toCollectionModel(sectors);
         collectionModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(SectorController.class).getAllSectors()).withRel("allSectors"));
-        return collectionModel;
+        return ResponseEntity.ok(collectionModel);
     }
 
     @GetMapping("{id}")
-    public EntityModel<SectorModel> getSectorById(@PathVariable Integer id) {
-        //return sectorService.findById(id).orElseThrow(() -> new SectorNotFoundException(id));
-        Sector sector = sectorService.findById(id).orElseThrow(() -> new SectorNotFoundException(id));
+    public ResponseEntity<SectorModel> getSectorById(@PathVariable @Min(1) Integer id) {
+        Sector sector = sectorService.findById(id);
         SectorModel sectorModel = new SectorModel(sector);
-        EntityModel<SectorModel> entityModel = new EntityModel<>(sectorModel, WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(SectorController.class).getSectorById(id)).withRel("sectorById"));
-        return entityModel;
+        sectorModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(SectorController.class).getSectorById(id)).withRel("sectorById"));
+        return ResponseEntity.ok(sectorModel);
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping(consumes = "application/json")
-    public Sector createSector(@RequestBody Sector sector) {
-        return sectorService.saveSector(sector);
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<SectorModel> createSector(@Valid @RequestBody Sector sector) throws ResourceAlreadyExistsException {
+        Integer id = sector.getId();
+        if (id != null && sectorService.existsById(id)) {
+            throw new ResourceAlreadyExistsException("Sector with ID [" + sector.getId() + "] is already exist!");
+        }
+        Sector savedSector = sectorService.saveSector(sector);
+        SectorModel sectorModel = new SectorModel(savedSector);
+        sectorModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(SectorController.class).getSectorById(savedSector.getId())).withRel("createdSector"));
+        return new ResponseEntity<>(sectorModel, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public Sector putSector(@RequestBody Sector newSector, @PathVariable Integer id) {
-        Sector sector = sectorService.findById(id).orElse(null);
-        if (sector != null) {
-            sector.setStadium(newSector.getStadium());
-            sector.setSectorName(newSector.getSectorName());
-            return sectorService.saveSector(sector);
+    public ResponseEntity<SectorModel> putSector(@Valid @RequestBody Sector newSector, @PathVariable @Min(1) Integer id) throws ResourceAlreadyExistsException {
+        if (sectorService.existsById(id)) {
+            Sector sector = sectorService.findById(id);
+            BeanUtils.copyProperties(newSector, sector);
+            sector.setId(id);
+            Sector updatedSector = sectorService.saveSector(sector);
+            SectorModel sectorModel = new SectorModel(updatedSector);
+            sectorModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(SectorController.class).getSectorById(id)).withRel("updatedSector"));
+            return ResponseEntity.ok(sectorModel);
+        } else {
+            Sector savedSector = sectorService.saveSector(newSector);
+            return new ResponseEntity<>(new SectorModel(savedSector).add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(SectorController.class).getSectorById(savedSector.getId())).withRel("createdSector")), HttpStatus.CREATED);
         }
-        return sectorService.saveSector(newSector);
     }
 
-    @PatchMapping(value = "/{id}", consumes = "application/json")
-    public Sector patchSector(@RequestBody Map<String, Object> update, @PathVariable Integer id) {
-        Sector sector = sectorService.findById(id).orElseThrow(() -> new SectorNotFoundException(id));
-        if (update.containsKey("stadium")) {
-            sector.setStadium((Stadium) update.get("stadium"));
+    @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<SectorModel> patchSector(@Valid @RequestBody Sector patchSector, @PathVariable @Min(1) Integer id) throws ResourceAlreadyExistsException {
+        Sector sector = sectorService.findById(id);
+        if (patchSector.getStadium() != null) {
+            sector.setStadium(patchSector.getStadium());
         }
-        if (update.containsKey("sectorName")) {
-            sector.setSectorName((String) update.get("sectorName"));
+        if (patchSector.getSectorName() != null) {
+            sector.setSectorName(patchSector.getSectorName());
         }
-        if (update.containsKey("numberOfSeats")) {
-            sector.setNumberOfSeats((Integer) update.get("numberOfSeats"));
+        if (patchSector.getNumberOfSeats() != null) {
+            sector.setNumberOfSeats(patchSector.getNumberOfSeats());
         }
-        return sectorService.saveSector(sector);
+        Sector updatedSector = sectorService.saveSector(sector);
+        return ResponseEntity.ok(new SectorModel(updatedSector).add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(SectorController.class).getSectorById(id)).withRel("updatedSector")));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    public void deleteSector(@PathVariable Integer id) {
-        try {
-            sectorService.deleteById(id);
-        } catch (EmptyResultDataAccessException e) { }
+    public void deleteSector(@PathVariable @Min(1) Integer id) {
+        sectorService.deleteById(id);
     }
 }

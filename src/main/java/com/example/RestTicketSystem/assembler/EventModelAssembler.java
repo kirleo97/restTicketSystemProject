@@ -5,6 +5,7 @@ import com.example.RestTicketSystem.model.EventModel;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 
 public class EventModelAssembler extends RepresentationModelAssemblerSupport<Event, EventModel> {
+
     public EventModelAssembler(Class<?> controllerClass, Class<EventModel> resourceType) {
         super(controllerClass, resourceType);
     }

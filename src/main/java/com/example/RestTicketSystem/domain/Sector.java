@@ -15,7 +15,7 @@ public class Sector {
     @Column(name = "SECTOR_ID")
     private Integer id;
 
-    @NotNull
+    @NotNull(message = "You have to choose stadium for sector")
     @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "STADIUM_ID", nullable = false)
     private Stadium stadium;
@@ -24,9 +24,9 @@ public class Sector {
     @Column(name = "SECTOR_NAME", nullable = false)
     private String sectorName;
 
-    @NotNull
+    @NotNull(message = "The sector's number of seats can't be empty!")
     @Column(name = "SECTOR_NUMBER_OF_SEATS", nullable = false)
-    @Positive
+    @Positive(message = "Number of seats must be positive")
     private Integer numberOfSeats;
 
     public Sector() {
